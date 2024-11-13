@@ -3,100 +3,77 @@ import java.util.*;
 public class Main {
     private static final String NAME_REGEX = "[A-zА-я]+";
     private static final String NUM_REGEX = "7[0-9]{10}";
-    private static TreeMap<String, Set<String>> phonebook = new TreeMap<>();
+    private static TreeMap<String, String> phonebook = new TreeMap<>();
 
     public static void main(String[] args) {
         System.out.println("\t\t телефонная книга \n");
 
-        while (true){
-            System.out.println("Введите команду, имя или номер: ");
-            String scanner = new Scanner(System.in).nextLine();
-            if (scanner.equalsIgnoreCase("print")){
-                System.out.println("Содержание телефонной книги: ");
-                printAll();
-            } else if (scanner.equalsIgnoreCase("exit")) {
-                System.out.println("Чао! ");
+        while(true){
+            System.out.println("Введите имя, номер или команду list, exit");
+            String input = new Scanner(System.in).nextLine();
+            if (input.equals("list")){
+                print();
+            } else if (input.equals("exit")) {
+                System.out.println("Чао!");
                 return;
-            } else if (scanner.matches(NAME_REGEX)) {
-                addByName(scanner);
-            } else if (scanner.replaceAll("\\D+", "").matches(NUM_REGEX)) {
-                addByNum(scanner.replaceAll("\\D+", ""));
-            } else {
-                System.out.println("Неверный ввод!");
+            } else if (input.matches(NAME_REGEX)) {
+                addByName(input);
+            } else if (input.matches(NUM_REGEX)) {
+                addByNum(input);
             }
         }
     }
 
-    private static void addToBook(String name, String num) {
-        if(phonebook.containsKey(name)){
-            phonebook.get(name).add(num);
-            System.out.println("Абоненту " + name + " добавлен номер " + num);
-        } else {
-            Set<String > nums = new TreeSet<>();
-            nums.add(num);
-            phonebook.put(name, nums);
-            System.out.println("Абонент " + name + " с номером " + num + " успешно добавлен");
+    private static void addByName(String name) {
+        if (phonebook.containsKey(name)){
+            System.out.println("такой абонент уже есть в базе " + phonebook.get(name));
         }
-    }
-
-    public static void addByName(String name){
-        if (phonebook.containsKey(name)) {
-            System.out.println("Абонент " + name + " уже существует!");
-            System.out.println("Номера: " + phonebook.get(name));
-        }
-        System.out.println("Введите номер для абонента " + name + ": ");
+        System.out.println("введите номер телефона для абонента " + name);
         String num = new Scanner(System.in).nextLine();
-        num = num.replaceAll("\\D+", "");
-        if (!num.matches(NUM_REGEX)) {
-            System.out.println("Это не номер!");
-            return;
-        }
-        for (Map.Entry<String, Set<String>> contact : phonebook.entrySet()) {
-            if (contact.getValue().contains(num)) {
-                System.out.println("Номер " + num + " уже есть у другого абонента " + searchByNum(num));
+        if (num.matches(NUM_REGEX)){
+            if (searchNum(num)){
                 return;
             }
+            phonebook.put(name, num);
+            System.out.println("номер сохранен!");
+        } else {
+            System.out.println("это не номер!");
         }
-
-        addToBook(name, num);
     }
 
-    public static void addByNum(String num){
-        for (Map.Entry<String, Set<String>> contact : phonebook.entrySet()) {
-            if (contact.getValue().contains(num)) {
-                System.out.println("Номер " + num + " уже есть у другого абонента " + searchByNum(num));
-                return;
-            }
+    private static void addByNum(String num){
+        if (searchNum(num)){
+            return;
         }
-
-        System.out.println("Введите имя абонента для номера: " + num);
+        System.out.println("введите имя для абонента " + num);
         String name = new Scanner(System.in).nextLine();
-        if(!name.matches(NAME_REGEX)){
-            System.out.println("Это не имя!");
-            return;
+        if (name.matches(NAME_REGEX)){
+            phonebook.put(name, num);
+        } else {
+            System.out.println("проверьте правильность ввода имени!");
         }
-        addToBook(name, num);
+
+
+    }
+    private static boolean searchNum(String num){
+        for (Map.Entry<String, String> entry : phonebook.entrySet()) {
+                if (entry.getValue().equals(num)) {
+                    System.out.println("абонент с таким номером уже есть в базе " + entry.getKey());
+                    return true;
+                }
+        }
+        return false;
     }
 
-    public static void printAll(){
-        if (phonebook.isEmpty()){
-            System.out.println("Записи отсутствуют");
-            return;
+
+
+
+
+    private static void print(){
+        for (Map.Entry<String, String> contact : phonebook.entrySet()){
+            System.out.println("Абонент: " + contact.getKey() + "\t номер телефона: " + contact.getValue());
         }
-        for (Map.Entry<String, Set<String>> contact : phonebook.entrySet()) {
-            System.out.println("Абонент: " + contact.getKey());
-            for (String num : contact.getValue()) {
-                System.out.println("\t" + num);
-            }
-        }
-    }
-    public static String searchByNum(String num){
-        String name = null;
-    for (Map.Entry<String, Set<String>> contact : phonebook.entrySet()) {
-            if (contact.getValue().contains(num)) {
-                name = contact.getKey();
-            }
-        }
-    return name;
     }
 }
+
+
